@@ -68,7 +68,7 @@ class RegionImpl implements Region {
      */
     void putNode(NodeImpl node) {
         if (node.getRegion() != this) {
-            throw new IllegalArgumentException(String.format("Node %s has incorrect region", node.toString()));
+            throw new IllegalArgumentException(String.format("Node %s has incorrect region", node));
         }
 
         nodes.put(node.getLocation(), node);

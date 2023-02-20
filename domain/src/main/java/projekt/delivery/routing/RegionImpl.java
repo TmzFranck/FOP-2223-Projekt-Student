@@ -30,9 +30,16 @@ class RegionImpl implements Region {
         this.distanceCalculator = distanceCalculator;
     }
 
+    /**
+     Returns the node associated with the specified location, or null if no node is associated with the location.
+     @param location the location of the node to retrieve
+     @return the node associated with the location, or null if no node is associated with the location
+     */
     @Override
     public @Nullable Node getNode(Location location) {
-        return crash(); // TODO: H2.1 - remove if implemented
+        if (location != null)
+            return nodes.get(location);
+        return null;
     }
 
     @Override
@@ -60,7 +67,11 @@ class RegionImpl implements Region {
      * @param node the {@link NodeImpl} to add.
      */
     void putNode(NodeImpl node) {
-        crash(); // TODO: H2.2 - remove if implemented
+        if (node.getRegion() != this) {
+            throw new IllegalArgumentException(String.format("Node %s has incorrect region", node.toString()));
+        }
+
+        nodes.put(node.getLocation(), node);
     }
 
     /**

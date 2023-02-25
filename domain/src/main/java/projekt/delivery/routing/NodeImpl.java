@@ -3,6 +3,8 @@ package projekt.delivery.routing;
 import org.jetbrains.annotations.Nullable;
 import projekt.base.Location;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.tudalgo.algoutils.student.Student.crash;
@@ -54,36 +56,69 @@ class NodeImpl implements Region.Node {
 
     @Override
     public @Nullable Region.Edge getEdge(Region.Node other) {
-        return crash(); // TODO: H3.1 - remove if implemented
+        return (!connections.contains(other.getLocation())) ? null : region.getEdges().stream()
+            .filter(edge -> (edge.getNodeA() == this && edge.getNodeB() == other) ||
+                (edge.getNodeA() == other && edge.getNodeB() == this))
+            .findFirst()
+            .orElse(null);
     }
 
     @Override
     public Set<Region.Node> getAdjacentNodes() {
-        return crash(); // TODO: H3.2 - remove if implemented
+        Set<Region.Node> adjacentNodes = new HashSet<>();
+        for (Location connection : connections) {
+            Region.Node node = region.getNode(connection);
+            if (node != null) {
+                adjacentNodes.add(node);
+            }
+        }
+        if (connections.contains(location)) {
+            adjacentNodes.add(this);
+        }
+        return adjacentNodes;
     }
 
     @Override
     public Set<Region.Edge> getAdjacentEdges() {
-        return crash(); // TODO: H3.3 - remove if implemented
+        Set<Region.Edge> adjacentEdges = new HashSet<>();
+        for (Region.Node adjacentNodes : getAdjacentNodes()) {
+            Region.Edge edge = getEdge(adjacentNodes);
+            if (edge != null) {
+                adjacentEdges.add(edge);
+            }
+        }
+        if (getEdge(this) != null) {
+            adjacentEdges.add(getEdge(this));
+        }
+        return adjacentEdges;
     }
 
     @Override
     public int compareTo(Region.Node o) {
-         return crash(); // TODO: H3.4 - remove if implemented
+         return location.compareTo(o.getLocation());
     }
 
     @Override
     public boolean equals(Object o) {
-        return crash(); // TODO: H3.5 - remove if implemented
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof NodeImpl other)) {
+            return false;
+        }
+        return this == other ||
+            (Objects.equals(this.name, other.name) &&
+                Objects.equals(this.location, other.location) &&
+                Objects.equals(this.connections, other.connections));
     }
 
     @Override
     public int hashCode() {
-        return crash(); // TODO: H3.6 - remove if implemented
+        return Objects.hash(name, location, connections);
     }
 
     @Override
     public String toString() {
-        return crash(); // TODO: H3.7 - remove if implemented
+        return String.format("NodeImpl(name='%s', location='%s', connections='%s')", name, location, connections);
     }
 }

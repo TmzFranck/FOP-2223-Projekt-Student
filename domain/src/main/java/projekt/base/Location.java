@@ -3,6 +3,8 @@ package projekt.base;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.tudalgo.algoutils.student.Student.crash;
 
@@ -16,6 +18,7 @@ public final class Location implements Comparable<Location> {
 
     private final int x;
     private final int y;
+    private static Set<Integer> generatedHashCodes = new HashSet<>();
 
     /**
      * Instantiates a new {@link Location} object using {@code x} and {@code y} as coordinates.
@@ -78,7 +81,7 @@ public final class Location implements Comparable<Location> {
     @Override
     public int compareTo(@NotNull Location o) {
         return (o.getX() == this.getX() && o.getY() == this.getY()) ? 0 :
-            ((this.getX() < o.getX() || this.getX() == o.getX()) && this.getY() < o.getY()) ? -1 : 1;
+            (this.getX() < o.getX()|| (this.getX() == o.getX() && this.getY() < o.getY())) ? -1 : 1;
     }
 
     /**
@@ -93,6 +96,14 @@ public final class Location implements Comparable<Location> {
         int result = 1;
         result = 31 * result + this.getX();
         result = 23 * result + this.getY();
+
+        while (generatedHashCodes.contains(result)) {
+            // if the generated hash code already exists, add 1 and try again
+            result++;
+        }
+
+        generatedHashCodes.add(result);
+
         return result;
     }
 
@@ -107,7 +118,7 @@ public final class Location implements Comparable<Location> {
             return false;
         }
         if (o instanceof Location) {
-            return this.getX() == ((Location) o).getX();
+            return this.getX() == ((Location) o).getX() && this.getY() == ((Location) o).getY();
         }
         return false;
     }
@@ -118,6 +129,6 @@ public final class Location implements Comparable<Location> {
      */
     @Override
     public String toString() {
-        return String.format("(%d,%d)", this.getX(), this.getY());
+        return String.format("(%d, %d)", this.getX(), this.getY());
     }
 }

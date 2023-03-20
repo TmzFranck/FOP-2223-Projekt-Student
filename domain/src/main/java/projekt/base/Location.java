@@ -18,7 +18,7 @@ public final class Location implements Comparable<Location> {
 
     private final int x;
     private final int y;
-    private static Set<Integer> generatedHashCodes = new HashSet<>();
+    private final int hashcode;
 
     /**
      * Instantiates a new {@link Location} object using {@code x} and {@code y} as coordinates.
@@ -29,6 +29,7 @@ public final class Location implements Comparable<Location> {
     public Location(int x, int y) {
         this.x = x;
         this.y = y;
+        hashcode = (x << 16) | (0xFFFF & y);
     }
 
     /**
@@ -93,18 +94,7 @@ public final class Location implements Comparable<Location> {
      */
     @Override
     public int hashCode() {
-        int result = 1;
-        result = 31 * result + this.getX();
-        result = 23 * result + this.getY();
-
-        while (generatedHashCodes.contains(result)) {
-            // if the generated hash code already exists, add 1 and try again
-            result++;
-        }
-
-        generatedHashCodes.add(result);
-
-        return result;
+        return hashcode;
     }
 
     /**

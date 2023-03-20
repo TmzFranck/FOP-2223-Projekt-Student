@@ -16,6 +16,9 @@ class RegionImpl implements Region {
     private final List<EdgeImpl> allEdges = new ArrayList<>();
     private final DistanceCalculator distanceCalculator;
 
+    private final Collection<Node> unmodifiableNodes = Collections.unmodifiableCollection(nodes.values());
+    private final Collection<Edge> unmodifiableEdges = Collections.unmodifiableCollection(allEdges);
+
     /**
      * Creates a new, empty {@link RegionImpl} instance using a {@link EuclideanDistanceCalculator}.
      */
@@ -37,26 +40,31 @@ class RegionImpl implements Region {
      */
     @Override
     public @Nullable Node getNode(Location location) {
-        if (location != null)
-            return nodes.get(location);
-        return null;
+        return nodes.get(location);
     }
 
     @Override
     public @Nullable Edge getEdge(Location locationA, Location locationB) {
-        return (locationA == null || locationB == null) ? null :
-            edges.get(locationA.compareTo(locationB) <= 0 ? locationA : locationB)
-                .get(locationA.compareTo(locationB) > 0 ? locationA : locationB);
+        if (locationA.compareTo(locationB) > 0) {
+            Location temp = locationA;
+            locationA = locationB;
+            locationB = temp;
+        }
+        final @Nullable Map<Location, EdgeImpl> firstDim = edges.get(locationA);
+        if (firstDim == null) {
+            return null;
+        }
+        return firstDim.get(locationB);
     }
 
     @Override
     public Collection<Node> getNodes() {
-        return Collections.unmodifiableCollection(nodes.values());
+        return unmodifiableNodes;
     }
 
     @Override
     public Collection<Edge> getEdges() {
-        return Collections.unmodifiableCollection(allEdges);
+        return unmodifiableEdges;
     }
 
     @Override
@@ -69,10 +77,9 @@ class RegionImpl implements Region {
      * @param node the {@link NodeImpl} to add.
      */
     void putNode(NodeImpl node) {
-        if (!this.equals(node.getRegion())) {
+        if (node.getRegion() != this) {
             throw new IllegalArgumentException(String.format("Node %s has incorrect region", node));
         }
-
         nodes.put(node.getLocation(), node);
     }
 
@@ -84,9 +91,12 @@ class RegionImpl implements Region {
         if (edge == null) {
             throw new IllegalArgumentException("Cannot add a null edge");
         }
+
+        // Check if edge is in this region
         if (!this.equals(edge.getRegion())) {
-            throw new IllegalArgumentException( String.format("Edge %s has incorrect region", edge));
+            throw new IllegalArgumentException(String.format("Edge %s has incorrect region", edge));
         }
+
         Node nodeA = edge.getNodeA();
         Node nodeB = edge.getNodeB();
 
@@ -98,12 +108,20 @@ class RegionImpl implements Region {
             throw new IllegalArgumentException(String.format("NodeB %s is not part of the region", edge.getLocationB()));
         }
 
-        Location smaller = edge.getLocationA().compareTo(edge.getLocationB()) <= 0 ? edge.getLocationA() : edge.getLocationB();
-        Location larger = smaller == edge.getLocationA() ? edge.getLocationB() : edge.getLocationA();
+        // Swap nodes if locationB < locationA
+        Location locationA = edge.getLocationA();
+        Location locationB = edge.getLocationB();
+        if (locationB.compareTo(locationA) < 0) {
+            Location temp = locationA;
+            locationA = locationB;
+            locationB = temp;
+            nodeA = edge.getNodeB();
+            nodeB = edge.getNodeA();
+        }
 
-        Map<Location, EdgeImpl> innerMap = new HashMap<>();
-        innerMap.put(larger, edge);
-        edges.put(smaller, innerMap);
+        Map<Location, EdgeImpl> innerMap = edges.getOrDefault(locationA, new HashMap<>());
+        innerMap.put(locationB, edge);
+        edges.put(locationA, innerMap);
         allEdges.add(edge);
     }
 
@@ -124,6 +142,6 @@ class RegionImpl implements Region {
 
     @Override
     public int hashCode() {
-        return Objects.hash(nodes, allEdges);
+        return Objects.hash(nodes, edges);
     }
 }

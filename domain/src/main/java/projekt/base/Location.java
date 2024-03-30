@@ -3,6 +3,8 @@ package projekt.base;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.tudalgo.algoutils.student.Student.crash;
 
@@ -17,6 +19,7 @@ public final class Location implements Comparable<Location> {
 
     private final int x;
     private final int y;
+    private final int hashcode;
 
     /**
      * Instantiates a new {@link Location} object using {@code x} and {@code y} as coordinates.
@@ -27,6 +30,7 @@ public final class Location implements Comparable<Location> {
     public Location(int x, int y) {
         this.x = x;
         this.y = y;
+        hashcode = (x << 16) | (0xFFFF & y);
     }
 
     /**
@@ -69,23 +73,53 @@ public final class Location implements Comparable<Location> {
         return new Location(x - other.x, y - other.y);
     }
 
+    /**
+     * Compares this Location with another specified Location based on their x and y coordinates.
+     *
+     * @param o the Location to compare with this Location
+     * @return -1 if this Location is less than the specified Location, 0 if they are equal, and 1 if this Location
+     * is greater than the specified Location
+     */
     @Override
     public int compareTo(@NotNull Location o) {
-        return crash(); // TODO: H1.1 - remove if implemented
+        return (o.getX() == this.getX() && o.getY() == this.getY()) ? 0 :
+            (this.getX() < o.getX()|| (this.getX() == o.getX() && this.getY() < o.getY())) ? -1 : 1;
     }
 
+    /**
+     * Returns a hash code value for this Location based on its x and y coordinates. The hash code is calculated
+     * using the formula (31 * xHash + 23 * yHash), where xHash is the hash code for the x-coordinate and yHash
+     * is the hash code for the y-coordinate.
+     *
+     * @return the hash code value for this Location
+     */
     @Override
     public int hashCode() {
-        return crash(); // TODO: H1.2 - remove if implemented
+        return hashcode;
     }
 
+    /**
+     Compares this Location object to the specified object for equality.
+     @param o the object to compare to this Location object
+     @return true if the specified object is a Location object with the same X value as this Location object, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
-        return crash(); // TODO: H1.3 - remove if implemented
+        if (o == null) {
+            return false;
+        }
+        if (o instanceof Location) {
+            return this.getX() == ((Location) o).getX() && this.getY() == ((Location) o).getY();
+        }
+        return false;
     }
 
+    /**
+     Returns a string representation of this Point object in the form "(X,Y)".
+     @return a string representation of this Point object
+     */
     @Override
     public String toString() {
-        return crash(); // TODO: H1.4 - remove if implemented
+        return String.format("(%d, %d)", this.getX(), this.getY());
     }
 }

@@ -3,6 +3,9 @@ package projekt.delivery.routing;
 import org.jetbrains.annotations.NotNull;
 import projekt.base.Location;
 
+import java.util.Comparator;
+import java.util.Objects;
+
 import static org.tudalgo.algoutils.student.Student.crash;
 
 /**
@@ -76,31 +79,52 @@ class EdgeImpl implements Region.Edge {
 
     @Override
     public Region.Node getNodeA() {
-        return crash(); // TODO: H4.1 - remove if implemented
+        return region.getNodes().stream()
+            .filter(node -> node.getLocation().equals(locationA))
+            .findFirst()
+            .orElse(null);
     }
 
     @Override
     public Region.Node getNodeB() {
-        return crash(); // TODO: H4.1 - remove if implemented
+        return region.getNodes().stream()
+            .filter(node -> node.getLocation().equals(locationB))
+            .findFirst()
+            .orElse(null);
     }
 
     @Override
     public int compareTo(Region.@NotNull Edge o) {
-        return crash(); // TODO: H4.2 - remove if implemented
+        Comparator<Region.Edge> compareNodeA = Comparator.comparing(Region.Edge::getNodeA);
+        Comparator<Region.Edge> compareNodeB = Comparator.comparing(Region.Edge::getNodeB);
+        return compareNodeA.thenComparing(compareNodeB).compare(this, o);
     }
 
     @Override
     public boolean equals(Object o) {
-        return crash(); // TODO: H4.3 - remove if implemented
+        if (o == null) {
+            return false;
+        }
+        else if (o == this) {
+            return true;
+        }
+        if (!(o instanceof EdgeImpl other)) {
+            return false;
+        }
+        return Objects.equals(this.name, other.name)
+            && Objects.equals(this.locationA, other.locationA)
+            && Objects.equals(this.locationB, other.locationB)
+            && Objects.equals(this.duration, other.duration);
     }
 
     @Override
     public int hashCode() {
-        return crash(); // TODO: H4.4 - remove if implemented
+        return Objects.hash(name, locationA, locationB, duration);
     }
 
     @Override
     public String toString() {
-        return crash(); // TODO: H4.5 - remove if implemented
+        return String.format("EdgeImpl(name='%s', locationA='%s', locationB='%s', duration='%s')",
+            name, locationA, locationB, duration);
     }
 }
